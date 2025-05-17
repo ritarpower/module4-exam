@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách khuyến mãi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+
+<div class="container bg-white p-4 rounded shadow-sm">
+    <h4 class="mb-4">Danh sách khuyến mãi</h4>
+
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a th:href="@{/show-add-promotion}" class="btn btn-success">Thêm mới khuyến mãi</a>
+        <form th:action="@{/find-promotion}" method="get" class="d-flex gap-2">
+            Mức giảm giá<input type="number" class="form-control" name="amount" style="width: 150px;">
+            Ngày bắt đầu<input type="date" class="form-control" name="startDate" style="width: 150px;">
+            Ngày kết thúc<input type="date" class="form-control" name="endDate" style="width: 150px;">
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        </form>
+    </div>
+
+    <h3 th:text="${message}" style="color: red"></h3>
+
+    <table class="table table-bordered">
+        <thead class="table-light">
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Thời gian bắt đầu</th>
+            <th>Thời gian kết thúc</th>
+            <th>Mức giảm giá (VND)</th>
+            <th>Chi tiết</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p, l : ${promotions}">
+            <td th:text="${p.title}"></td>
+            <td th:text="${p.startDate != null ? #temporals.format(p.startDate, 'dd/MM/yyyy') : ''}"></td>
+            <td th:text="${p.endDate != null ? #temporals.format(p.endDate, 'dd/MM/yyyy') : ''}"></td>
+            <td th:text="${p.amount}"></td>
+            <td th:text="${p.description}"></td>
+            <td>
+                <button type="button"
+                        class="btn btn-delete btn-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirmDeleteModal"
+                        th:attr="data-id=${p.id}, data-title=${p.title}">
+                    Xóa
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <span id="modalDeleteMessage">Bạn có muốn xóa Chương trình khuyến mãi này?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post">
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const modalMessage = document.getElementById('modalDeleteMessage');
+
+    confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const promotionId = button.getAttribute('data-id');
+        const promotionTitle = button.getAttribute('data-title');
+
+        deleteForm.setAttribute('action', `/delete-promotion/${promotionId}`);
+        modalMessage.textContent = `Bạn có muốn xóa Chương trình khuyến mãi: "${promotionTitle}"?`;
+    });
+</script>
+
+</body>
+</html>
